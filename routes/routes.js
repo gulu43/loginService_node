@@ -4,6 +4,18 @@ import { User } from "../models/user.model.js";
 const router = express.Router();
 // console.log("router",router);
 
+router.post("/login", async (req, res) => {
+    try {
+        
+    } catch (error) {
+        res.status(500)
+        .json({
+            message: error?.message
+        })
+    }
+})
+
+
 router.post("/signup", async ( req, res ) => {
     
     try {
