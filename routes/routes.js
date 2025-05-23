@@ -6,9 +6,33 @@ const router = express.Router();
 
 router.post("/login", async (req, res) => {
     try {
-        
+        const {email, password} = req.body
+
+        if ( !email || !password ) {
+            return res.status(400)
+        .json({
+            message: "Fiels are reqired",
+        })           
+        }
+
+        const dbUser = await User.findOne({ email })
+
+        if (!dbUser) {
+            return req.status(400)
+            .json({
+                message: "User Does not exsist, Plz Register first"
+            })
+        }
+
+        if (email == dbUser.email && password == dbUser.password) {
+            return res.status(300)
+            .json({ message: " you loged in"})
+        }else{
+            return res.status(404)
+            .json({ message: " email or password is incorrect "})
+        }
     } catch (error) {
-        res.status(500)
+        return res.status(500)
         .json({
             message: error?.message
         })
