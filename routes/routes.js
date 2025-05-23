@@ -4,6 +4,18 @@ import { User } from "../models/user.model.js";
 const router = express.Router();
 // console.log("router",router);
 
+router.get("/udata", async (req, res) => {
+    try {
+        const allUsers = await User.find({}).select("-_id -createdAt -updatedAt -__v -fullName -password")
+        return res.status(200)
+        .json( allUsers )
+    } catch (error) {
+        return res.status(500)
+        .json({ meg: "server error",
+            error: error?.message})
+    }
+})
+
 router.post("/login", async (req, res) => {
     try {
         const {email, password} = req.body
@@ -23,10 +35,13 @@ router.post("/login", async (req, res) => {
                 message: "User Does not exsist, Plz Register first"
             })
         }
-
+// { message: " you loged in"}
         if (email == dbUser.email && password == dbUser.password) {
             return res.status(300)
-            .json({ message: " you loged in"})
+            .json({
+                data: dbUser.select("-_id"),
+                message2:"you loged-in"
+            })
         }else{
             return res.status(404)
             .json({ message: " email or password is incorrect "})
