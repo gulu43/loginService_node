@@ -25,17 +25,26 @@ const loginUser = async (req, res) => {
         const dbUser = await User.findOne({ email })
 
         if (!dbUser) {
-            return req.status(400)
+            return res.status(400)
             .json({
                 message: "User Does not exsist, Plz Register first"
             })
         }
 
+        console.log("email from frontend:", email);
+        console.log("email in db:", dbUser.email);
+        console.log("password from frontend:", password);
+        console.log("password in db:", dbUser.password);
+        console.log("dbUser fetched:", dbUser);
+
+
         if (email == dbUser.email && password == dbUser.password) {
-            return res.status(300)
+            console.log("loged-in in backend");
+            
+            return res.status(200)
             .json({
-                data: dbUser.select("-_id"),
-                message2:"you loged-in"
+                data: dbUser,
+                message:"you loged-in"
             })
         }else{
             return res.status(404)

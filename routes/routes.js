@@ -4,6 +4,7 @@ import { getAllUsers, loginUser, signupUser} from "../controllers/user.controlle
 const router = express.Router();
 // console.log("router",router);
 
+// here?
 router.get("/udata", getAllUsers )
 
 router.post("/login", loginUser )
