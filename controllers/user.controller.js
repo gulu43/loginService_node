@@ -1,4 +1,9 @@
 import { User } from "../models/user.model.js";
+import bcrypt from "bcryptjs";
+
+const salt = async()=>{
+    return await bcrypt.genSalt(10)
+}
 
 const getAllUsers = async (req, res) => {
     try {
@@ -37,8 +42,10 @@ const loginUser = async (req, res) => {
         console.log("password in db:", dbUser.password);
         console.log("dbUser fetched:", dbUser);
 
-
-        if (email == dbUser.email && password == dbUser.password) {
+        const isMatch = await bcrypt.compare(password, dbUser.password)
+        console.log("password matching",isMatch);
+        
+        if (email == dbUser.email && isMatch) {
             console.log("loged-in in backend");
             
             return res.status(200)
@@ -61,7 +68,7 @@ const signupUser = async ( req, res ) => {
     
     try {
         const {email, fullName, password} = req.body;
-        // console.log("values-> ",email, fullName, password);
+        console.log(" server values-> ",email, fullName, password);
         
 
         const userExisting = await User.findOne({ email: email })
@@ -73,7 +80,11 @@ const signupUser = async ( req, res ) => {
                 msg: "User allready exists"
             });
         }
-        const user = await User.create({email, fullName, password});
+
+        // encreapt the password
+        const encryptedPassword = await bcrypt.hash(password, await salt())
+
+        const user = await User.create({email, fullName, password: encryptedPassword});
         return res
         .status(200)
         .json(user)

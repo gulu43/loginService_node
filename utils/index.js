@@ -3,13 +3,12 @@ import { connectDbFn } from "../DB/db_connection.js";
 import { router } from "../routes/routes.js";
 import cors from "cors";
 
-// import {app} '
 
 let app = express();
 // console.log(app);
 
 app.use(cors({
-  origin: 'http://localhost:5173', // <--  React app
+  origin: 'http://localhost:5173', // <--  React app 
   credentials: true // only needed for cookies or sessions
 }));
 
