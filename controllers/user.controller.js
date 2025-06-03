@@ -68,7 +68,8 @@ const signupUser = async ( req, res ) => {
     
     try {
         const {email, fullName, password} = req.body;
-        console.log(" server values-> ",email, fullName, password);
+        const profilePhoto = req.file?.filename;
+        console.log(" server values-> ",email, fullName, password, profilePhoto);
         
 
         const userExisting = await User.findOne({ email: email })
@@ -84,7 +85,7 @@ const signupUser = async ( req, res ) => {
         // encreapt the password
         const encryptedPassword = await bcrypt.hash(password, await salt())
 
-        const user = await User.create({email, fullName, password: encryptedPassword});
+        const user = await User.create({email, fullName, password: encryptedPassword, profilePhoto});
         return res
         .status(200)
         .json(user)
