@@ -1,5 +1,14 @@
 import { User } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
+import { uploadToCloudinary } from "../utils/cloudinary.js";
+
+import path from "path"; // Make sure this is imported at the top
+import { fileURLToPath } from 'url'; // Needed if you're using ES Modules
+import { dirname } from 'path';
+
+// ES Module __dirname workaround
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const salt = async()=>{
     return await bcrypt.genSalt(10)
@@ -68,7 +77,9 @@ const signupUser = async ( req, res ) => {
     
     try {
         const {email, fullName, password} = req.body;
-        const profilePhoto = req.file?.filename;
+        const profilePhoto = req.file.filename || "";
+        console.log("profilePhoto from user--0-----0----0--->",profilePhoto);
+        
         console.log(" server values-> ",email, fullName, password, profilePhoto);
         
 
@@ -82,10 +93,23 @@ const signupUser = async ( req, res ) => {
             });
         }
 
+        // upload to cloudinary
+        let cloudinaryPhotoUrl = "";
+        if (profilePhoto != "") {
+            const localFilePath = path.join(__dirname, "../uploades", profilePhoto);
+            console.log("localFilePath from user------0----0---->",localFilePath);
+            
+            const result = await uploadToCloudinary(localFilePath);   
+            console.log("result from user------0----0---->",result);
+            if (result?.secure_url) {
+                cloudinaryPhotoUrl = result.secure_url;
+            }
+        }
+
         // encreapt the password
         const encryptedPassword = await bcrypt.hash(password, await salt())
 
-        const user = await User.create({email, fullName, password: encryptedPassword, profilePhoto});
+        const user = await User.create({email, fullName, password: encryptedPassword, profilePhoto: cloudinaryPhotoUrl});
         return res
         .status(200)
         .json(user)
