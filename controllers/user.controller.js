@@ -50,6 +50,7 @@ const loginUser = async (req, res) => {
         console.log("password from frontend:", password);
         console.log("password in db:", dbUser.password);
         console.log("dbUser fetched:", dbUser);
+        console.log("profilePhoto from dbUser :", dbUser.profilePhoto);
 
         const isMatch = await bcrypt.compare(password, dbUser.password)
         console.log("password matching",isMatch);
@@ -77,8 +78,7 @@ const signupUser = async ( req, res ) => {
     
     try {
         const {email, fullName, password} = req.body;
-        const profilePhoto = req.file.filename || "";
-        console.log("profilePhoto from user--0-----0----0--->",profilePhoto);
+        const profilePhoto = req.file?.filename || "";
         
         console.log(" server values-> ",email, fullName, password, profilePhoto);
         
@@ -97,10 +97,8 @@ const signupUser = async ( req, res ) => {
         let cloudinaryPhotoUrl = "";
         if (profilePhoto != "") {
             const localFilePath = path.join(__dirname, "../uploades", profilePhoto);
-            console.log("localFilePath from user------0----0---->",localFilePath);
             
             const result = await uploadToCloudinary(localFilePath);   
-            console.log("result from user------0----0---->",result);
             if (result?.secure_url) {
                 cloudinaryPhotoUrl = result.secure_url;
             }
@@ -114,7 +112,7 @@ const signupUser = async ( req, res ) => {
         .status(200)
         .json(user)
     } catch (error) {
-        res.status(500).json({ "error": error?.message });
+        res.status(500).json({ "error": error });
     }
     
 }
