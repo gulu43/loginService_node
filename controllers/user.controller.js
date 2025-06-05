@@ -89,7 +89,7 @@ const signupUser = async ( req, res ) => {
             return res
             .status(400)
             .json({
-                msg: "User allready exists"
+                message: "User allready exists"
             });
         }
 
