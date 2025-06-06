@@ -23,6 +23,15 @@ app.use(cors({
 app.use(express.json())
 app.use("/user", router)
 
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "API route not found",
+    path: req.originalUrl
+  });
+});
+
+
 connectDbFn()
 .then(() => {
     const _PORT = process.env.PORT || 8000;
