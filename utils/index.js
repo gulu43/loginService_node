@@ -14,7 +14,7 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"], 
   credentials: true // only needed for cookies or sessions
 }));
-
+ 
 // Logger Middleware
 // app.use((req, res, next) => {
 //   console.log(`[${req.method}] ${req.url}`);
