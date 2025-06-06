@@ -7,8 +7,10 @@ import cors from "cors";
 let app = express();
 // console.log(app);
 
+// origin: 'http://localhost:5173',
+
 app.use(cors({
-  origin: 'http://localhost:5173', // <--  React app 
+  origin: `${process.env.CORS_ORIGIN}`, // <--  React app 
   credentials: true // only needed for cookies or sessions
 }));
 
