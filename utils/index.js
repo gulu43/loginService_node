@@ -10,7 +10,8 @@ let app = express();
 // origin: 'http://localhost:5173',
 
 app.use(cors({
-  origin: `${process.env.CORS_ORIGIN}`, // <--  React app 
+  origin: `${process.env.CORS_ORIGIN}`,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"], 
   credentials: true // only needed for cookies or sessions
 }));
 
@@ -22,14 +23,6 @@ app.use(cors({
 
 app.use(express.json())
 app.use("/user", router)
-
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: "API route not found",
-    path: req.originalUrl
-  });
-});
 
 
 connectDbFn()
