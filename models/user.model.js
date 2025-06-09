@@ -20,6 +20,11 @@ const userSchema = new mongoose.Schema( {
     profilePhoto: {
         type: String,
         required: false,
+    },
+    refreshToken: {
+        type: String,
+        required: false,
+        default: null
     }
 }, { timestamps: true} )
 

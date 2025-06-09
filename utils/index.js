@@ -2,7 +2,8 @@ import express from "express"
 import { connectDbFn } from "../DB/db_connection.js";
 import { router } from "../routes/routes.js";
 import cors from "cors";
-
+import cookieParser from 'cookie-parser';
+// import jwt from 'jsonwebtoken';
 
 let app = express();
 // console.log(app);
@@ -22,6 +23,8 @@ app.use(cors({
 // });
 
 app.use(express.json())
+app.use(cookieParser())
+
 app.use("/user", router)
 
 

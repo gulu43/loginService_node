@@ -1,6 +1,8 @@
 import { User } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import { uploadToCloudinary } from "../utils/cloudinary.js";
+// import cookieParser from 'cookie-parser';
+import jwt from 'jsonwebtoken';
 
 import path from "path"; // Make sure this is imported at the top
 import { fileURLToPath } from 'url'; // Needed if you're using ES Modules
@@ -117,4 +119,80 @@ const signupUser = async ( req, res ) => {
     
 }
 
-export { getAllUsers, loginUser, signupUser }
+const autoUserLogin = async ( req, res ) => {
+    
+    const accessToken = req.cookies?.access_token;
+    console.log(accessToken);
+    
+    // checking if empty
+    if (accessToken == undefined || accessToken == null) {
+        // back to login routes 
+        // add code
+        return res
+        .status(401)
+        .json({ message: `Cookiee expire or its first itme login
+                , please login again `
+            })
+    }
+    
+    // checking if its expire or not
+    try {
+        const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+        console.log(decoded);
+        
+        const userFromToken = await User.findById(decoded._id);
+        console.log(userFromToken);
+        
+        // ||  userFromToken.refreshToken !== accessToken
+        if (!userFromToken ) {
+            // back to login routes 
+            // add code
+            return res
+            .status(403)
+            .json({ message: "Invalid refresh token" });
+        }
+
+        return res
+        .status(200)
+        .json({ message: `You loged-in` })
+
+    } catch (error) {
+        return res
+        .status(401)
+        .json({ message: `Refresh token expired or invalid
+                , please login again \n ${error}`
+            })
+    }
+    
+    
+    
+
+}
+
+const refreshUserLogin = async (req, res) => {
+    // just after login
+    
+    // tempoy this two variable come from login methord
+    
+    const accessTokenNew = jwt.sign( {
+        dbUser._id,
+        email,
+        password
+    }, process.env.ACCESS_TOKEN_SECRET
+    , process.env.ACCESS_TOKEN_EXPIRY)
+    // ADD TO  COOKIE
+    res.cookie(accessTokenNew, editable: false)
+
+    const refressTokenNew = jwt.sign( {
+        dbUser._id,
+        email,
+        password
+    }, process.env.REFRESH_TOKEN_SECRET
+    , process.env.REFRESH_TOKEN_EXPIRY)
+
+    dbUser.refreshToken = refressTokenNew;
+    await dbUser.save();
+
+}
+
+export { getAllUsers, loginUser, signupUser, autoUserLogin, refreshUserLogin }
