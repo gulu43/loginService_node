@@ -60,6 +60,9 @@ const loginUser = async (req, res) => {
         if (email == dbUser.email && isMatch) {
             console.log("loged-in in backend");
             
+            // for send the jwt token
+            await refreshUserLogin(req, res, dbUser);
+
             return res.status(200)
             .json({
                 data: dbUser,
@@ -67,8 +70,9 @@ const loginUser = async (req, res) => {
             })
         }else{
             return res.status(404)
-            .json({ message: " email or password is incorrect "})
+            .json({ message: "email or password is incorrect "})
         }
+
     } catch (error) {
         return res.status(500)
         .json({
@@ -121,35 +125,33 @@ const signupUser = async ( req, res ) => {
 
 const autoUserLogin = async ( req, res ) => {
     
-    const accessToken = req.cookies?.access_token;
-    console.log(accessToken);
+    const accessToken = req.cookies?.accessTokenHeader;
+    console.log("cookiee ",accessToken);
     
     // checking if empty
     if (accessToken == undefined || accessToken == null) {
-        // back to login routes 
-        // add code
+        
         return res
         .status(401)
-        .json({ message: `Cookiee expire or its first itme login
+        .json({ message: `Cookiee expire or its first time login
                 , please login again `
             })
+        .redirect("/login")
     }
     
     // checking if its expire or not
     try {
         const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
-        console.log(decoded);
+        console.log("decoded cookiee ",decoded);
         
         const userFromToken = await User.findById(decoded._id);
-        console.log(userFromToken);
+        console.log("user from token getting from mongodb ",userFromToken);
         
-        // ||  userFromToken.refreshToken !== accessToken
-        if (!userFromToken ) {
-            // back to login routes 
-            // add code
+        if (!userFromToken || userFromToken.refreshToken != accessToken ) {
             return res
             .status(403)
-            .json({ message: "Invalid refresh token" });
+            .json({ message: "Invalid refresh token" })
+            .redirect("/login")
         }
 
         return res
@@ -162,31 +164,36 @@ const autoUserLogin = async ( req, res ) => {
         .json({ message: `Refresh token expired or invalid
                 , please login again \n ${error}`
             })
+        .redirect("/login")
     }
-    
-    
     
 
 }
 
-const refreshUserLogin = async (req, res) => {
+const refreshUserLogin = async (req, res, dbUser) => {
     // just after login
-    
-    // tempoy this two variable come from login methord
-    
-    const accessTokenNew = jwt.sign( {
-        dbUser._id,
+
+    const {email, password} = req.body;
+
+    const accessTokenNew = jwt.sign({
+        "_id": dbUser._id,
         email,
-        password
+        fullName
     }, process.env.ACCESS_TOKEN_SECRET
     , process.env.ACCESS_TOKEN_EXPIRY)
+
     // ADD TO  COOKIE
-    res.cookie(accessTokenNew, editable: false)
+    res.cookie("accessTokenHeader", accessTokenNew, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "Strick" : "Lax",
+        maxAge: process.env.REFRESH_TOKEN_EXPIRY
+    })
 
     const refressTokenNew = jwt.sign( {
-        dbUser._id,
+        "_id": dbUser._id,
         email,
-        password
+        fullName
     }, process.env.REFRESH_TOKEN_SECRET
     , process.env.REFRESH_TOKEN_EXPIRY)
 
