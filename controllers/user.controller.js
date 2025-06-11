@@ -3,6 +3,8 @@ import bcrypt from "bcryptjs";
 import { uploadToCloudinary } from "../utils/cloudinary.js";
 // import cookieParser from 'cookie-parser';
 import jwt from 'jsonwebtoken';
+import ms from "ms";
+
 
 import path from "path"; // Make sure this is imported at the top
 import { fileURLToPath } from 'url'; // Needed if you're using ES Modules
@@ -136,7 +138,7 @@ const autoUserLogin = async ( req, res ) => {
         .json({ message: `Cookiee expire or its first time login
                 , please login again `
             })
-        .redirect("/login")
+        // .redirect("/login") handle it with frontend not backend
     }
     
     // checking if its expire or not
@@ -147,16 +149,17 @@ const autoUserLogin = async ( req, res ) => {
         const userFromToken = await User.findById(decoded._id);
         console.log("user from token getting from mongodb ",userFromToken);
         
-        if (!userFromToken || userFromToken.refreshToken != accessToken ) {
+        //  || userFromToken.refreshToken != accessToken 
+        if (!userFromToken) {
             return res
             .status(403)
             .json({ message: "Invalid refresh token" })
-            .redirect("/login")
+            // .redirect("/login") handle it with frontend not backend
         }
 
         return res
         .status(200)
-        .json({ message: `You loged-in` })
+        .json({ message: `You Auto loged-in JWT token` })
 
     } catch (error) {
         return res
@@ -164,7 +167,7 @@ const autoUserLogin = async ( req, res ) => {
         .json({ message: `Refresh token expired or invalid
                 , please login again \n ${error}`
             })
-        .redirect("/login")
+        // .redirect("/login") handle it with frontend not backend
     }
     
 
@@ -173,29 +176,33 @@ const autoUserLogin = async ( req, res ) => {
 const refreshUserLogin = async (req, res, dbUser) => {
     // just after login
 
-    const {email, password} = req.body;
+    const { email } = req.body;
 
     const accessTokenNew = jwt.sign({
         "_id": dbUser._id,
         email,
-        fullName
+        "fullName": dbUser.fullName
     }, process.env.ACCESS_TOKEN_SECRET
-    , process.env.ACCESS_TOKEN_EXPIRY)
+    , { 
+        "expiresIn": `${process.env.ACCESS_TOKEN_EXPIRY}`
+    })
 
     // ADD TO  COOKIE
     res.cookie("accessTokenHeader", accessTokenNew, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "Strick" : "Lax",
-        maxAge: process.env.REFRESH_TOKEN_EXPIRY
+        maxAge: ms(process.env.REFRESH_TOKEN_EXPIRY)
     })
 
     const refressTokenNew = jwt.sign( {
         "_id": dbUser._id,
         email,
-        fullName
+        "fullName": dbUser.fullName
     }, process.env.REFRESH_TOKEN_SECRET
-    , process.env.REFRESH_TOKEN_EXPIRY)
+    , { 
+        "expiresIn": `${process.env.REFRESH_TOKEN_EXPIRY}`
+    })
 
     dbUser.refreshToken = refressTokenNew;
     await dbUser.save();
@@ -203,3 +210,4 @@ const refreshUserLogin = async (req, res, dbUser) => {
 }
 
 export { getAllUsers, loginUser, signupUser, autoUserLogin, refreshUserLogin }
+
