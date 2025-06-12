@@ -1,9 +1,18 @@
 import dotenv from "dotenv";
 import mongoose from "mongoose";
+import path from "path";
+import { fileURLToPath } from "url";
 
-dotenv.config({
-    path: '../.env'
-})
+// Get directory of current file
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+if (process.env.NODE_ENV !== "production") {
+    dotenv.config({
+        path: path.resolve(__dirname, "../.env") 
+    });
+}
+
 
 // console.log("DB URL:", process.env.MONGO_URL); 
 

@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "",
-    "dev": ""
+    "dev": "node utils/index.js"
   },
   "author": "Gulamnabi",
   "license": "ISC",
