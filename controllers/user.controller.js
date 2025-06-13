@@ -191,11 +191,11 @@ const refreshUserLogin = async (req, res, dbUser) => {
         "expiresIn": `${process.env.ACCESS_TOKEN_EXPIRY}`
     })
 
-    // ADD TO  COOKIE
+    // ADD TO  COOKIE Strick
     res.cookie("accessTokenHeader", accessTokenNew, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "Strick" : "Lax",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         maxAge: ms(process.env.REFRESH_TOKEN_EXPIRY)
     })
 
