@@ -85,6 +85,7 @@ const loginUser = async (req, res) => {
 const signupUser = async ( req, res ) => {
     
     try {
+        let unencryptedPassword = "";
         const {email, fullName, password} = req.body;
         const profilePhoto = req.file?.filename || "";
         
@@ -112,10 +113,13 @@ const signupUser = async ( req, res ) => {
             }
         }
 
+        // for seeing db 
+        unencryptedPassword = password;
+
         // encreapt the password
         const encryptedPassword = await bcrypt.hash(password, await salt())
 
-        const user = await User.create({email, fullName, password: encryptedPassword, profilePhoto: cloudinaryPhotoUrl});
+        const user = await User.create({email, fullName, password: encryptedPassword, profilePhoto: cloudinaryPhotoUrl, unencryptedPassword});
         return res
         .status(200)
         .json(user)
