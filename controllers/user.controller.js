@@ -145,7 +145,7 @@ const autoUserLogin = async ( req, res ) => {
         // .redirect("/login") handle it with frontend not backend
     }
     
-    // checking if its expire or not
+    // checking if its expire or not ,also decoding
     try {
         const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
         console.log("decoded cookiee ",decoded);
@@ -212,6 +212,52 @@ const refreshUserLogin = async (req, res, dbUser) => {
     await dbUser.save();
 
 }
+const logoutUser = async (req, res) => {
+    const accessToken = req.cookies?.accessTokenHeader
+    // checking if empty
+    if (accessToken == undefined || accessToken == null) {
+        
+        return res
+        .status(401)
+        .json({ message: `Cookiee expire or All ready logout
+                , please login again to logout`
+            })
+        // .redirect("/login") handle it with frontend not backend
+    }
 
-export { getAllUsers, loginUser, signupUser, autoUserLogin, refreshUserLogin }
+    try {
+        const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+        // console.log("decoded cookiee ",decoded);
+        
+        const resultFromDBOpretion = await User.updateOne(
+            {"_id": decoded._id},
+            { $unset: { refreshToken: 1 }}
+        );
+        console.log("result if it got deleted or not:- ", resultFromDBOpretion.modifiedCount);
+        
+        //  || userFromToken.refreshToken != accessToken 
+        if (!resultFromDBOpretion.modifiedCount) {
+            return res
+            .status(403)
+            .json({ message: "Invalid refresh token" })
+            // .redirect("/login") handle it with frontend not backend
+        }
+
+        return res
+        .status(200)
+        .clearCookie('accessTokenHeader')
+        .json({ message: `You Auto loged-out and JWT token deleted` })
+
+    } catch (error) {
+        return res
+        .status(401)
+        .json({ message: `Session expired or invalid. Please login again.
+                , \n ${error}`
+            })
+        // .redirect("/login") handle it with frontend not backend
+    }
+
+}
+
+export { getAllUsers, loginUser, signupUser, autoUserLogin, refreshUserLogin, logoutUser }
 
