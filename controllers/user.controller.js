@@ -252,7 +252,7 @@ const logoutUser = async (req, res) => {
             })
         .json({ 
             ok: true, 
-            message: `You Auto loged-out and JWT token deleted` 
+            message: `You loged-out and JWT token deleted` 
         })
 
     } catch (error) {
