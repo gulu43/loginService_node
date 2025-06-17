@@ -245,8 +245,15 @@ const logoutUser = async (req, res) => {
 
         return res
         .status(200)
-        .clearCookie('accessTokenHeader')
-        .json({ message: `You Auto loged-out and JWT token deleted` })
+        .clearCookie('accessTokenHeader', {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", 
+            })
+        .json({ 
+            ok: true, 
+            message: `You Auto loged-out and JWT token deleted` 
+        })
 
     } catch (error) {
         return res
