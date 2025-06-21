@@ -18,7 +18,23 @@ const storage = multer.diskStorage({
   }
 })
 
-const upload = multer({ storage: storage })
+const upload = multer({ 
+  storage: storage,
+  limits: { fileSize: 2 * 1024 * 1024 },
+  fileFilter: function (req, file, cb) {
+    const allowedTypes = /jpeg|jpg|png|webp/;
+    const ext = path.extname(file.originalname).toLowerCase();
+    const mimeType = file.mimetype;
+
+    if (allowedTypes.test(ext) && allowedTypes.test(mimeType)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only .png, .jpg, .jpeg, .webp formats are allowed and size must be below 2MB!'));
+    }
+
+  }
+
+})
 
 export { upload };
 

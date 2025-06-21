@@ -85,6 +85,7 @@ const loginUser = async (req, res) => {
 const signupUser = async ( req, res ) => {
     
     try {
+
         let unencryptedPassword = "";
         const {email, fullName, password} = req.body;
         const profilePhoto = req.file?.filename || "";
@@ -124,7 +125,8 @@ const signupUser = async ( req, res ) => {
         .status(200)
         .json(user)
     } catch (error) {
-        res.status(500).json({ "error": error });
+        
+        res.status(500).json({ "error": "only photo under 2mb "+error });
     }
     
 }
